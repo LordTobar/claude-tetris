@@ -134,8 +134,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = Math.max(baseLevel, Math.floor(lines / 10) + 1);
+    dropInterval = intervalFor(level);
     updateHUD();
   }
 }
@@ -258,13 +258,13 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    hidePauseMenu();
+    cancelAnimationFrame(animId);
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showPauseMenu();
   }
 }
 
@@ -289,24 +289,26 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  baseLevel = startLevel;
+  level = baseLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = intervalFor(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  hidePauseMenu();
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
   if (e.target === themeBtn && e.code === 'Space') return;
+  if (pauseKeyHook(e)) return;
   if (e.code === 'KeyT') { toggleTheme(); return; }
-  if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -332,6 +334,69 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 themeBtn.addEventListener('click', () => { toggleTheme(); themeBtn.blur(); });
+
+// ==== Menú de pausa ====
+const pauseMenu = document.getElementById('pause-menu');
+const resumeBtn = document.getElementById('resume-btn');
+const pauseRestartBtn = document.getElementById('pause-restart-btn');
+const controlsBtn = document.getElementById('controls-btn');
+const pauseControls = document.getElementById('pause-controls');
+const startLevelSel = document.getElementById('start-level');
+
+let startLevel = 1;
+let baseLevel = 1; // nivel inicial de la partida en curso (no cambia al editar el select)
+let inputBlockUntil = 0;
+let ignoreRepeats = false;
+
+function intervalFor(lv) {
+  return Math.max(100, 1000 - (lv - 1) * 90);
+}
+
+try {
+  const saved = parseInt(localStorage.getItem('startLevel'), 10);
+  if (saved >= 1 && saved <= 10) startLevel = saved;
+} catch (e) {}
+startLevelSel.value = String(startLevel);
+
+function showPauseMenu() {
+  pauseControls.classList.add('hidden');
+  controlsBtn.setAttribute('aria-expanded', 'false');
+  pauseMenu.classList.remove('hidden');
+  resumeBtn.focus();
+}
+
+function hidePauseMenu() {
+  if (pauseMenu.classList.contains('hidden')) return;
+  pauseMenu.classList.add('hidden');
+  if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+  inputBlockUntil = performance.now() + 150;
+  ignoreRepeats = true;
+}
+
+// Devuelve true si la tecla ya fue consumida (pausa/menú/bloqueo de input).
+function pauseKeyHook(e) {
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    // Esc dentro del select solo cierra su desplegable
+    if (!e.repeat && e.target !== startLevelSel) togglePause();
+    return true;
+  }
+  if (!e.repeat) ignoreRepeats = false;
+  if (e.code === 'KeyT') return false;
+  if (paused) return true; // menú abierto: no mover ni disparar acciones de juego
+  if (!gameOver && (e.repeat && ignoreRepeats || performance.now() < inputBlockUntil)) return true;
+  return false;
+}
+
+resumeBtn.addEventListener('click', togglePause);
+pauseRestartBtn.addEventListener('click', init);
+controlsBtn.addEventListener('click', () => {
+  const open = pauseControls.classList.toggle('hidden') === false;
+  controlsBtn.setAttribute('aria-expanded', String(open));
+});
+startLevelSel.addEventListener('change', () => {
+  startLevel = parseInt(startLevelSel.value, 10) || 1;
+  try { localStorage.setItem('startLevel', String(startLevel)); } catch (e) {}
+});
 
 applyTheme(initialTheme());
 
