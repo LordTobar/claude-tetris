@@ -50,7 +50,33 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+        <div id="overlay-records" class="records-section" hidden>
+          <form id="record-form" class="record-form" hidden>
+            <p id="record-msg"></p>
+            <div class="record-row">
+              <input id="record-name" type="text" maxlength="12" autocomplete="off" placeholder="Tu nombre" aria-label="Nombre" />
+              <button type="submit" id="record-save">Guardar</button>
+            </div>
+          </form>
+          <div id="overlay-table"></div>
+          <p id="overlay-stats" class="records-stats"></p>
+        </div>
         <button id="restart-btn">Reiniciar</button>
+      </div>
+    </div>
+
+    <div id="start-screen" class="overlay">
+      <div class="overlay-box">
+        <p class="start-title">RECORDS</p>
+        <div id="start-table"></div>
+        <p id="start-stats" class="records-stats"></p>
+        <button id="start-btn" type="button">Jugar</button>
+        <button id="reset-records-btn" type="button" class="link-btn">Resetear records</button>
+        <div id="reset-confirm" class="reset-confirm" hidden>
+          <span>¿Borrar todo?</span>
+          <button id="reset-yes" type="button">Sí</button>
+          <button id="reset-no" type="button">No</button>
+        </div>
       </div>
     </div>
   </div>
