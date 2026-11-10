@@ -45,6 +45,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Game Over** con opción de reinicio.
 - **Pantalla de inicio** con **tabla de records local** (top 5 con nombre, guardada en `localStorage`), mejor combo y líneas máximas; botón para resetear records.
 - **Modo claro / oscuro** con botón (o tecla `T`); respeta `prefers-color-scheme` y recuerda tu elección.
+- **Skins** (Retro, Neon, Pastel, Pixel art) con selector en el panel; se guarda en `localStorage` y cambia sin recargar.
 
 ---
 

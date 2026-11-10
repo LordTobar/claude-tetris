@@ -391,3 +391,19 @@ kbd {
   border-radius: 4px;
   padding: 3px 6px;
 }
+
+
+/* ---- Skins ---- */
+#skin-select {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#skin-select:hover {
+  border-color: var(--accent);
+}
